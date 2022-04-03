@@ -1,19 +1,44 @@
 'reach 0.1';
 
+const Player = {
+  getHand: Fun([], UInt),
+  getGuess: Fun([UInt], UInt),
+  seeOutcome: Fun([UInt], Null),
+};
+
 export const main = Reach.App(() => {
-  const A = Participant('Alice', {
-    // Specify Alice's interact interface here
+  const Alice = Participant('Alice', {
+    ...Player,
   });
-  const B = Participant('Bob', {
-    // Specify Bob's interact interface here
+  const Bob = Participant('Bob', {
+    ...Player,
   });
   init();
-  // The first one to publish deploys the contract
-  A.publish();
+  
+  Alice.only(() => {
+    const handAlice = declassify(interact.getHand());
+    const guessAlice = declassify(interact.getGuess(handAlice));
+  });
+  Alice.publish(handAlice, guessAlice);
   commit();
-  // The second one to publish always attaches
-  B.publish();
+  
+  Bob.only(() => {
+    const handBob = declassify(interact.getHand());
+    const guessBob = declassify(interact.getGuess(handBob));
+  });
+  Bob.publish(handBob, guessBob);
+
+  const handSum = handAlice + handBob;
+  const outcome = guessAlice == guessBob // tie, both scores
+    ? 1
+    : guessAlice == handSum // Alice wins
+    ? 2
+    : guessBob == handSum // Bob wins
+    ? 0
+    : 1; // tie, both not scores
   commit();
-  // write your program here
-  exit();
+
+  each([Alice, Bob], () => {
+    interact.seeOutcome(outcome);
+  });
 });
