@@ -8,8 +8,13 @@ const stdlib = loadStdlib(process.env);
 console.log(`The consensus network is ${stdlib.connector}.`);
 const suStr = stdlib.standardUnit;
 const auStr = stdlib.atomicUnit;
-console.log(`The standard unit is ${suStr}`);
-console.log(`The atomic unit is ${auStr}`);
+const toAU = (su) => stdlib.parseCurrency(su);
+const toSU = (au) => stdlib.formatCurrency(au, 4);
+const suBal = 1000;
+console.log(`Balance is ${suBal} ${suStr}`);
+const auBal = toAU(suBal);
+console.log(`Balance is ${auBal} ${auStr}`);
+console.log(`Balance is ${toSU(auBal)} ${suStr}`);
 
 (async () => {
   const commonInteract = {};
