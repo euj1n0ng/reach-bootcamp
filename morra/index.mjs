@@ -10,17 +10,19 @@ const [ accAlice, accBob ] =
 const ctcAlice = accAlice.contract(backend);
 const ctcBob = accBob.contract(backend, ctcAlice.getInfo());
 
-const HAND = [0, 1, 2, 3, 4, 5];
-const OUTCOME = ['Bob wins', 'Draw', 'Alice wins'];
+const FINGERS = [0, 1, 2, 3, 4, 5];
 const GUESS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+const OUTCOME = ['Bob wins', 'Draw', 'Alice wins'];
+
 const Player = (Who) => ({
-  getHand: () => {
-    const hand = Math.floor(Math.random() * 6);
-    console.log(`${Who} played ${HAND[hand]}`);
-    return hand;
+  ...stdlib.hasRandom,
+  getFingers: () => {
+    const fingers = Math.floor(Math.random() * 6);
+    console.log(`${Who} played ${FINGERS[fingers]}`);
+    return fingers; 
   },
-  getGuess: (hand) => {
-    const guess = Math.floor(Math.random() * 6) + HAND[hand];
+  getGuess: (fingers) => {
+    const guess = Math.floor(Math.random() * 6) + FINGERS[fingers];
     console.log(`${Who} guessed ${GUESS[guess]}`);
     return guess;
   },
