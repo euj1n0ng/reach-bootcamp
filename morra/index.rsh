@@ -17,7 +17,7 @@ const winner = (fingersA, fingersB, guessA, guessB) => {
   } 
     else {
       if (  ((fingersA + fingersB) == guessB)) {
-        const myoutcome = B_WINS;
+        const myoutcome = B_WINS
         return myoutcome;// player B wins
     } 
       else {
@@ -103,7 +103,7 @@ export const main =
           const _fingersA = interact.getFingers();
           const _guessA = interact.getGuess(_fingersA);  
           // log fingersA to frontend       
-          interact.log(_fingersA);  
+          // interact.log(_fingersA);  
           // interact.log(_guessA);  
           // We need Alice to be able to publish her fingers and guess, 
           // but also keep it secret.  makeCommitment does this.    
