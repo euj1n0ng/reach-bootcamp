@@ -1,0 +1,98 @@
+import { loadStdlib, ask } from '@reach-sh/stdlib';
+import * as backend from './build/index.main.mjs';
+const stdlib = loadStdlib();
+
+const isAlice = await ask.ask(
+  `Are you Alice?`,
+  ask.yesno
+);
+
+console.log(`Starting Fortune Telling!`);
+
+let acc = null;
+const createAcc = await ask.ask(
+  `Would you like to create an account? (only possible on devnet)`,
+  ask.yesno
+);
+if (createAcc) {
+  acc = await stdlib.newTestAccount(stdlib.parseCurrency(1000));
+} else {
+  const secret = await ask.ask(
+    `What is your account secret?`,
+    (x => x)
+  );
+  acc = await stdlib.newAccountFromSecret(secret);
+}
+
+let ctc = null;
+if (isAlice) {
+  ctc = acc.contract(backend);
+  ctc.getInfo().then((info) => {
+    console.log(`The contract is deployed as = ${JSON.stringify(info)}`); });
+} else {
+  const info = await ask.ask(
+    `Please paste the contract information:`,
+    JSON.parse
+  );
+  ctc = acc.contract(backend, info);
+}
+
+const fmt = (x) => stdlib.formatCurrency(x, 4);
+const getBalance = async () => fmt(await stdlib.balanceOf(acc));
+
+const before = await getBalance();
+console.log(`Your balance is ${before}`);
+
+const interact = {};
+
+const FORTUNE = ['Millionaire', 'Billionaire', 'Trillionaire'];
+const FORTUNES = {
+  'Millionaire': 0, 'M': 0, 'm': 0,
+  'Billionaire': 1, 'B': 1, 'b': 1,
+  'Trillionaire': 2, 'T': 2, 't': 2,
+};
+
+const DECISIONS = {
+  'False': false, 'F': false, 'f': false,
+  'True': true, 'T': true, 't': true,
+};
+
+if (isAlice) {
+  const amt = await ask.ask(
+    `How much do you want to pay?`,
+    stdlib.parseCurrency
+  );
+  interact.payment = amt;
+
+  interact.decideFortuneTruthy = async () => {
+    const decision = await ask.ask(`What will you decide?`, (x) => {
+      const decision = DECISIONS[x];
+      if ( decision === undefined ) {
+        throw Error(`Not a valid decision ${decision}`);
+      }
+      return decision;
+    });
+    console.log(`You decided it is ${decision.toString()}.`);
+    return decision;
+  };
+} else {
+  interact.readFortune = async () => {
+    const fortune = await ask.ask(`What fortune will you read?`, (x) => {
+      const fortune = FORTUNES[x];
+      if ( fortune === undefined ) {
+        throw Error(`Not a valid fortune ${fortune}`);
+      }
+      return fortune;
+    });
+    console.log(`You read ${FORTUNE[fortune]}.`);
+    return fortune;
+  };
+}
+
+const part = isAlice ? ctc.p.Alice : ctc.p.Bob;
+await part(interact);
+
+const after = await getBalance();
+console.log(`Your balance is now ${after}`);
+
+ask.done();
