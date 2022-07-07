@@ -9,22 +9,22 @@ const Common = {
 export const main = Reach.App(() => {
   const A = Participant('Alice', {
     ...Common,
-    getSwap: Fun([], Tuple(Address, UInt, UInt, UInt)),
+    getSwap: Fun([], Tuple(Array(Address, 1), UInt, UInt, UInt)),
   });
   const B = Participant('Bob', {
     ...Common,
-    accSwap: Fun([Address], Bool),
+    accSwap: Fun([Array(Address, 1)], Bool),
   });
   init();
 
   A.only(() => {
-    const [ addrB, amtA, amtB, time ] = declassify(interact.getSwap()); });
-  A.publish(addrB, amtA, amtB, time)
+    const [ addrsForB, amtA, amtB, time ] = declassify(interact.getSwap()); });
+  A.publish(addrsForB, amtA, amtB, time)
     .pay(amtA);
   commit();
 
   B.only(() => {
-    const matched = declassify(interact.accSwap(addrB));
+    const matched = declassify(interact.accSwap(addrsForB));
     assume(matched, 'Invalid address') });
   B.pay(amtB)
     .timeout(relativeTime(time), () => {

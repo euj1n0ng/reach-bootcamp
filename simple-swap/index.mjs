@@ -36,15 +36,15 @@ const doSwap = async (amtA, amtB) => {
       ...Common(`Alice`),
       getSwap: () => {
         console.log(`Alice proposes swap of Alice's ${fmt(amtA)} for Bob's ${fmt(amtB)}`);
-        return [ accBob, amtA, amtB, time ]; },
+        return [ [accBob], amtA, amtB, time ]; },
     }),
     backend.Bob(ctcBob, {
       ...Common(`Bob`),
       accSwap: (v) => {
-        console.log(`Allowed address is `, v);
+        console.log(`Allowed addresses are `, v);
         const addrBob = accBob.networkAccount.address;
         console.log(`Bob's address is `, addrBob);
-        if (addrBob == v) {
+        if (v.includes(addrBob)) {
           return true;
         }
         return false; },
